@@ -12,7 +12,7 @@ open_editor_option="@open-editor"
 open_editor_override="@open-editor-command"
 
 default_open_copy_action="copy-pipe-and-cancel"
-open_copy_action_option="@open-copy-action"
+open_copy_action="@open-copy-action"
 
 command_exists() {
 	local command="$1"
@@ -92,7 +92,7 @@ generate_editor_command() {
 
 set_copy_mode_open_bindings() {
 	local open_command="$(generate_open_command)"
-	local copy_action=$(get_tmux_option "$open_copy_action_option" "$default_open_copy_action")
+	local copy_action=$(get_tmux_option "$open_copy_action" "$default_open_copy_action")
 	local key_bindings=$(get_tmux_option "$open_option" "$default_open_key")
 	local key
 	for key in $key_bindings; do
@@ -123,7 +123,7 @@ set_copy_mode_open_editor_bindings() {
 
 set_copy_mode_open_search_bindings() {
 	local stored_engine_vars="$(stored_engine_vars)"
-	local copy_action=$(get_tmux_option "$open_copy_action_option" "$default_open_copy_action")
+	local copy_action=$(get_tmux_option "$open_copy_action" "$default_open_copy_action")
 	local engine_var
 	local engine
 	local key
