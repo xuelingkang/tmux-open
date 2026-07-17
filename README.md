@@ -4,6 +4,15 @@ Plugin for opening highlighted selection directly from Tmux copy mode.
 
 Tested and working on Linux, OSX and Cygwin.
 
+### Enhancements over upstream
+
+- **`~` (tilde) expansion**: Paths like `~/Documents/file.txt` are
+  automatically expanded to the absolute home directory path before opening.
+- **`@open-copy-action`**: Configure whether to stay in copy-mode after
+  opening a selection. Set to `copy-pipe` to remain in copy-mode (useful for
+  opening multiple files in sequence). Defaults to `copy-pipe-and-cancel`
+  (same as upstream behavior).
+
 ### Key bindings
 
 In tmux copy mode:
@@ -33,7 +42,7 @@ In copy mode:
 
 Add plugin to the list of TPM plugins in `.tmux.conf`:
 
-    set -g @plugin 'tmux-plugins/tmux-open'
+    set -g @plugin 'xuelingkang/tmux-open'
 
 Hit `prefix + I` to fetch the plugin and source it. You should now be able to
 use the plugin.
@@ -42,7 +51,7 @@ use the plugin.
 
 Clone the repo:
 
-    $ git clone https://github.com/tmux-plugins/tmux-open ~/clone/path
+    $ git clone https://github.com/xuelingkang/tmux-open ~/clone/path
 
 Add this line to the bottom of `.tmux.conf`:
 
@@ -80,6 +89,11 @@ set -g @open-S 'https://www.google.com/search?q='
 ```
 
 in `tmux.conf`
+
+> How can I stay in copy-mode after opening a file? (open multiple files)
+
+Put `set -g @open-copy-action 'copy-pipe'` in `tmux.conf`. The default is
+`copy-pipe-and-cancel`.
 
 ### Other goodies
 
