@@ -11,6 +11,9 @@ default_open_editor_key="C-o"
 open_editor_option="@open-editor"
 open_editor_override="@open-editor-command"
 
+default_open_copy_action="copy-pipe-and-cancel"
+open_copy_action_option="@open-copy-action"
+
 command_exists() {
 	local command="$1"
 	type "$command" >/dev/null 2>&1
@@ -40,14 +43,14 @@ preserve_url_hash() {
 
 command_generator() {
 	local command_string="$1"
-	echo "$(preserve_url_hash) | xargs -I {} tmux run-shell -b 'cd #{pane_current_path}; $command_string \"{}\" > /dev/null'"
+	echo "$(preserve_url_hash) | sed 's|^~|${HOME}|' | xargs -I {} tmux run-shell -b 'cd #{pane_current_path}; $command_string \"{}\" > /dev/null'"
 }
 
 search_command_generator() {
 	local command_string="$1"
 	local engine="$2"
 
-	echo "$(preserve_url_hash) | sed 's/\ /+/g' | xargs -I {} tmux run-shell -b 'cd #{pane_current_path}; $command_string $engine\"{}\" > /dev/null'"
+	echo "$(preserve_url_hash) | sed 's|^~|${HOME}|' | sed 's/\ /+/g' | xargs -I {} tmux run-shell -b 'cd #{pane_current_path}; $command_string $engine\"{}\" > /dev/null'"
 }
 
 generate_open_command() {
@@ -89,12 +92,13 @@ generate_editor_command() {
 
 set_copy_mode_open_bindings() {
 	local open_command="$(generate_open_command)"
+	local copy_action=$(get_tmux_option "$open_copy_action_option" "$default_open_copy_action")
 	local key_bindings=$(get_tmux_option "$open_option" "$default_open_key")
 	local key
 	for key in $key_bindings; do
 		if tmux-is-at-least 2.4; then
-			tmux bind-key -T copy-mode-vi "$key" send-keys -X copy-pipe-and-cancel "$open_command"
-			tmux bind-key -T copy-mode    "$key" send-keys -X copy-pipe-and-cancel "$open_command"
+			tmux bind-key -T copy-mode-vi "$key" send-keys -X "$copy_action" "$open_command"
+			tmux bind-key -T copy-mode    "$key" send-keys -X "$copy_action" "$open_command"
 		else
 			tmux bind-key -t vi-copy    "$key" copy-pipe "$open_command"
 			tmux bind-key -t emacs-copy "$key" copy-pipe "$open_command"
@@ -119,6 +123,7 @@ set_copy_mode_open_editor_bindings() {
 
 set_copy_mode_open_search_bindings() {
 	local stored_engine_vars="$(stored_engine_vars)"
+	local copy_action=$(get_tmux_option "$open_copy_action_option" "$default_open_copy_action")
 	local engine_var
 	local engine
 	local key
@@ -127,8 +132,8 @@ set_copy_mode_open_search_bindings() {
 		engine="$(get_engine "$engine_var")"
 
 		if tmux-is-at-least 2.4; then
-			tmux bind-key -T copy-mode-vi "$engine_var" send-keys -X copy-pipe-and-cancel "$(generate_open_search_command "$engine")"
-			tmux bind-key -T copy-mode    "$engine_var" send-keys -X copy-pipe-and-cancel "$(generate_open_search_command "$engine")"
+			tmux bind-key -T copy-mode-vi "$engine_var" send-keys -X "$copy_action" "$(generate_open_search_command "$engine")"
+			tmux bind-key -T copy-mode    "$engine_var" send-keys -X "$copy_action" "$(generate_open_search_command "$engine")"
 		else
 			tmux bind-key -t vi-copy    "$engine_var" copy-pipe "$(generate_open_search_command "$engine")"
 			tmux bind-key -t emacs-copy "$engine_var" copy-pipe "$(generate_open_search_command "$engine")"
